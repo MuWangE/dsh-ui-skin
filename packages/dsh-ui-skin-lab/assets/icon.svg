@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="dsh-ui-skin-lab">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#0b0c0e" stroke="#33363f" stroke-width="2"/>
+  <circle cx="22" cy="22" r="7" fill="#7c9eff"/>
+  <rect x="34" y="15" width="14" height="14" fill="#b48cff"/>
+  <rect x="15" y="34" width="14" height="14" fill="#6b5a8f"/>
+  <path d="M34 34h14v14H34z" fill="#ece7f7"/>
+  <path d="M34 34h7v7h-7z" fill="#b48cff"/>
+</svg>

@@ -1,0 +1,33 @@
+{
+  "id": "dsh-ui-skin-plain",
+  "name": "素色基准",
+  "nameEn": "Plain Baseline",
+  "author": "鱼工坊",
+  "tagline": "中性灰品牌色，不做结构覆盖：多皮肤框架的验证皮肤",
+  "taglineEn": "Neutral gray brand color, no structural overrides: verifies the multi-skin framework",
+  "description": "板块 B 原始定义里的第二套皮肤。只推两个中性灰品牌 token，不重绘任何结构——它的价值是让「装两套皮肤、切换互斥、卸载回默认」这条链路可以被真实验收。",
+  "tags": [
+    "neutral",
+    "baseline",
+    "minimal"
+  ],
+  "accent": "#4b5563",
+  "bodyAttr": "data-dsu-skin",
+  "bodyAttrValues": [
+    "plain"
+  ],
+  "dshCompatibility": ">=0.2.0-rc.2 <0.3.0-0",
+  "package": "dsh-ui-skin-plain",
+  "wiring": {
+    "id": "ui-skin-plain",
+    "bundleWired": true
+  },
+  "multiSkin": {
+    "kind": "hub",
+    "hubKey": "__dshSkinHub",
+    "lockKey": "__dshSkinLock",
+    "activeKey": "dsh-ui-skin.active"
+  },
+  "order": 20,
+  "note": "没有 preview / desktopIcon：不写不存在的路径。"
+}

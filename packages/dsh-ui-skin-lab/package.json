@@ -1,0 +1,50 @@
+{
+  "name": "dsh-ui-skin-lab",
+  "version": "0.1.0",
+  "description": "DSH 平台外观实验室：极简与像素两套预设，只改样式、不改行为。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "theme",
+    "skin",
+    "ui"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./tokens.css": "./tokens.css",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "tokens.css",
+    "selectors.json",
+    "assets/icon.svg",
+    "locale",
+    "cordis.patch.yml",
+    "README.md",
+    "skin.json"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.2.0-rc.2 <0.3.0-0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  }
+}

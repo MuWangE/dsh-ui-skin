@@ -1,0 +1,36 @@
+{
+  "id": "dsh-ui-skin-lab",
+  "name": "外观实验室",
+  "nameEn": "Skin Lab",
+  "author": "鱼工坊",
+  "tagline": "极简与像素两套预设，只改样式不改行为",
+  "taglineEn": "Minimal and pixel presets; styles only, never behavior",
+  "description": "DSH 平台外观实验室：minimal（深色高对比）与 pixel（16-bit）两套预设，外加主色 / 圆角 / 动效 / 陪看图标四个旋钮；正文字号交给官方设置。值走官方 overrideTokens，结构走 tokens.css。",
+  "tags": [
+    "minimal",
+    "pixel",
+    "dark",
+    "high-contrast",
+    "theming"
+  ],
+  "accent": "#3b6ef5",
+  "bodyAttr": "data-dsu-skin",
+  "bodyAttrValues": [
+    "minimal",
+    "pixel"
+  ],
+  "dshCompatibility": ">=0.2.0-rc.2 <0.3.0-0",
+  "package": "dsh-ui-skin-lab",
+  "wiring": {
+    "id": "ui-skin-lab",
+    "bundleWired": true
+  },
+  "multiSkin": {
+    "kind": "hub",
+    "hubKey": "__dshSkinHub",
+    "lockKey": "__dshSkinLock",
+    "activeKey": "dsh-ui-skin.active"
+  },
+  "order": 10,
+  "note": "没有 preview / desktopIcon：不写不存在的路径。补图之后再加这两个字段。"
+}

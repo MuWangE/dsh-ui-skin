@@ -1,0 +1,4 @@
+# dsh-ui-skin-lab：只挂一行，资源路由和客户端入口都由包自己声明。
+- insert:
+    - id: ui-skin-lab
+      name: 'dsh-ui-skin-lab'

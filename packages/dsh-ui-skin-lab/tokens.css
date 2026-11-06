@@ -1,0 +1,228 @@
+/**
+ * dsh-ui-skin-lab · 组件级覆盖（结构），不含值
+ *
+ * 颜色 / 圆角 / 字体不在这里：它们在 `lib/client.js` 的 `PRESET_TOKENS`，
+ * 经 `ctx.theme.overrideTokens()` 注入官方主题层（写成 body 内联样式，
+ * 优先级最高，且自动跟随 light/dark 切换）。
+ *
+ * 2026-11-05 实测过的两条前提，改这个文件前先记住：
+ *   1. 变量必须落在 body 上（官方在 body 重新声明整套 --dsw-*，
+ *      写 html 的覆盖后代读不到）。走 overrideTokens 就不用手写这一层了。
+ *   2. 这里的每条规则必须以 html[data-dsu-skin] 开头 —— 卸载时属性一撤，
+ *      样式全失效，这是回退保证。tests/check-selectors.mjs 强制。
+ *
+ * 新增依赖官方 DOM 的选择器必须登记 selectors.json。
+ */
+
+/* ============================================================
+ * 0. 形态变量（pixel 专用）
+ *
+ * 不是官方 token（--dsw-*），是皮肤自己的「形态常量」：硬边宽度、
+ * 三档硬阴影、滚动条厚度。组件规则只引用它们，加新组件时不要再抄
+ * 2px / rgba(0,0,0,.28) —— 那样改一次手感要改十几个地方。
+ *
+ * 只定义在 pixel 上；所有引用都带兜底，minimal 读不到时退回原值。
+ * 兜底值 = 2026-11-05 之前的写死值，保证观感零变化。
+ *
+ * 阴影为什么不用官方 --dsw-elevation-*：那是 `0 0 0 .5px` 的描边阴影，
+ * 不是浮层投影，像素风的硬阴影官方没有对应物。
+ * ============================================================ */
+html[data-dsu-skin="pixel"] {
+  --dsu-edge: 2px;
+  --dsu-shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.28);
+  --dsu-shadow-md: 3px 3px 0 rgba(0, 0, 0, 0.28);
+  --dsu-shadow-lg: 4px 4px 0 rgba(0, 0, 0, 0.28);
+  --dsu-scrollbar: 12px;
+}
+
+/* ============================================================
+ * 1. 共用组件规则（两套预设都适用）
+ * 只做 token 表达不了的事：给某块加一条结构性的分隔线。
+ * ============================================================ */
+html[data-dsu-skin] [data-slot="conversation.header"] {
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+/* 动效开关：transition / animation 没法用 CSS 变量表达，只能整体关。
+   属性放在 html 上（data-dsu-motion="off"），由 client 的 syncMotion() 维护，
+   皮肤停用或卸载时会一并撤掉。
+   注意前缀必须以 html[data-dsu-skin 开头（check-selectors 的卸载保证）。 */
+html[data-dsu-skin][data-dsu-motion="off"],
+html[data-dsu-skin][data-dsu-motion="off"] *,
+html[data-dsu-skin][data-dsu-motion="off"] *::before,
+html[data-dsu-skin][data-dsu-motion="off"] *::after {
+  transition: none !important;
+  animation: none !important;
+  /* 平滑滚动不属于 transition，得单独压掉（官方 CSS 里有 1 处 scroll-behavior:smooth）。 */
+  scroll-behavior: auto !important;
+}
+
+/* pixel 硬切（2026-11-06，DESIGN §6 的「0ms」）：
+   官方 CSS 有 22 处 transition，全部硬编码，token 和变量都管不到，
+   只能靠 !important 整体压。选择器限定 pixel——minimal 的 120/200ms 不动。
+   **只压 transition + scroll-behavior，不压 animation**：官方 17 个 @keyframes 里
+   `_spin` / `_dsh-state-dot-spin` / `_dsh-plugin-detail-skeleton` / 打字指示点
+   都是「进行中」的表达，压掉会让界面看起来卡死，那是功能损失，不是风格。
+   transition 才是「0ms 瞬变」的本体。 */
+html[data-dsu-skin="pixel"],
+html[data-dsu-skin="pixel"] *,
+html[data-dsu-skin="pixel"] *::before,
+html[data-dsu-skin="pixel"] *::after {
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ============================================================
+ * 2. pixel 组件覆盖
+ * token 负责颜色/圆角/字体；这里补「哪些元素要画边框、要直角」，
+ * 因为官方有些容器自带不透明背景，光换变量盖不住。
+ * ============================================================ */
+html[data-dsu-skin="pixel"] [data-slot="sidebar"] {
+  background: var(--dsw-specific-sidebar-fill);
+  border-right: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+}
+
+/* 侧栏真正的容器（官方类名，maid-atelier 同款选择器） */
+html[data-dsu-skin="pixel"] [class*="sidebarCol"],
+html[data-dsu-skin="pixel"] [class*="sidebarCol"] > div {
+  background: var(--dsw-specific-sidebar-fill);
+  border-right: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+}
+
+/* 会话头部（对话/轨迹那一行） */
+html[data-dsu-skin="pixel"] header[class*="header"] {
+  background: var(--dsw-alias-bg-layer-1);
+  border-bottom: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+}
+
+/* 输入框卡片：token 已把圆角归零，这里补硬边框和硬阴影 */
+html[data-dsu-skin="pixel"] [data-composer-card] {
+  background: var(--dsw-alias-bg-layer-1);
+  border: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+  border-radius: 0;
+  box-shadow: var(--dsu-shadow-sm, 2px 2px 0 rgba(0, 0, 0, 0.28));
+}
+
+html[data-dsu-skin="pixel"] [data-composer-card] :is(button, textarea, input) {
+  border-radius: 0;
+}
+
+/* 滚动条也做成硬边方块 */
+html[data-dsu-skin="pixel"] ::-webkit-scrollbar {
+  width: var(--dsu-scrollbar, 12px);
+  height: var(--dsu-scrollbar, 12px);
+}
+
+html[data-dsu-skin="pixel"] ::-webkit-scrollbar-thumb {
+  background: var(--dsw-alias-border-l2);
+  border: var(--dsu-edge, 2px) solid var(--dsw-specific-sidebar-fill);
+  border-radius: 0;
+}
+
+html[data-dsu-skin="pixel"] ::-webkit-scrollbar-track {
+  background: var(--dsw-alias-bg-base);
+  border-radius: 0;
+}
+
+/* 代码块：背景 / 圆角 / banner 走官方的 --dsl-code-block-* 中间层
+   （那 19 个 --dsl-* 全部映射到 --dsw-*，token 层已经管到了），
+   这里只补像素风的硬边框和硬阴影。
+   容器 .md-code-block 是官方非哈希类名，已登记 selectors.json。 */
+html[data-dsu-skin="pixel"] .md-code-block {
+  border: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+  box-shadow: var(--dsu-shadow-sm, 2px 2px 0 rgba(0, 0, 0, 0.28));
+}
+
+/* 工具调用：试过用 [data-tool]（官方挂在根元素的工具名）做硬边，
+   2026-11-05 实测**视觉无变化**——紧凑形态下那行是纯文本，没有边框载体；
+   展开态用的是哈希类名（.hKdVjq_root / .ZG377q_card 分属不同包），没有稳定锚点。
+   结论：放弃覆盖，别再用 [class*="_card"] 硬凑。 */
+
+/* ============================================================
+ * 4. 交互组件形态（M5 补：按钮 / tab / 菜单 / 对话框）
+ *
+ * 纪律：**只改不占布局的属性**——box-shadow / outline / 背景 / 颜色。
+ * 2026-11-05 实测：官方按钮高度只有 24px，加 2px border 会变 28px；
+ * 页面上有 268 个 button，只改一处盒模型就能把整版挤歪。
+ * 所以描边一律用 inset box-shadow 模拟，浮层用 outline（不参与布局）。
+ *
+ * 锚点都是语义属性（[role=...]），不是哈希类名：
+ * 实测 tab 4 个、tablist 2 个、button 268 个；dialog / menu 只在
+ * 打开设置页或菜单时才渲染（当前页面 0 个，规则先放着，等真机验）。
+ * ============================================================ */
+
+/* 按钮：只在「按钮集群」里常驻描边（输入区 / 对话框 / 菜单），别全局都加。
+   2026-11-05 实测：给全部 268 个 button 加描边后，侧栏每个菜单项都变成方框，
+   视觉噪音太大，违背「界面退后、内容在前」。
+   `.dsu-skin-toggle` 例外：它是「停用我的皮肤」那种文字链接式按钮，
+   实测被这条规则框成一个紫块、把文字盖住了。 */
+html[data-dsu-skin="pixel"] [data-composer-card] button:not([disabled]),
+html[data-dsu-skin="pixel"] [role="dialog"] button:not([disabled]):not(.dsu-skin-toggle),
+html[data-dsu-skin="pixel"] [role="menu"] button:not([disabled]) {
+  box-shadow: inset 0 0 0 var(--dsu-edge, 2px) var(--dsw-alias-border-l2);
+}
+
+/* 全局：静态不加框，悬停/键盘聚焦时出现像素描边（交互反馈，不占布局） */
+html[data-dsu-skin="pixel"] button:not([disabled]):hover,
+html[data-dsu-skin="pixel"] button:not([disabled]):focus-visible {
+  box-shadow: inset 0 0 0 var(--dsu-edge, 2px) var(--dsw-alias-brand-primary);
+}
+
+/* tab：底部一条实线；选中的换成品牌色（官方自己也有下划线，这条是加粗版） */
+html[data-dsu-skin="pixel"] [role="tab"] {
+  box-shadow: inset 0 calc(var(--dsu-edge, 2px) * -1) 0 0 var(--dsw-alias-border-l1);
+}
+
+html[data-dsu-skin="pixel"] [role="tab"][aria-selected="true"] {
+  box-shadow: inset 0 calc(var(--dsu-edge, 2px) * -1) 0 0 var(--dsw-alias-brand-primary);
+}
+
+/* 用户消息气泡：像素硬边 + 硬阴影。
+   载体是 `[class*="bubble"]`（哈希前缀会变，类名里带 bubble；risk=medium，登记在 selectors.json）。
+   用 inset 描边 + 外阴影，两者都不参与布局，所以气泡尺寸不会变。 */
+html[data-dsu-skin="pixel"] [data-chat-flow-kind="user"] [class*="bubble"] {
+  box-shadow:
+    inset 0 0 0 var(--dsu-edge, 2px) var(--dsw-alias-border-l2),
+    var(--dsu-shadow-sm, 2px 2px 0 rgba(0, 0, 0, 0.28));
+}
+
+/* 浮层：菜单 / 对话框——硬阴影 + 贴边描边，不占布局 */
+html[data-dsu-skin="pixel"] [role="menu"],
+html[data-dsu-skin="pixel"] [role="dialog"],
+html[data-dsu-skin="pixel"] [role="alertdialog"] {
+  outline: var(--dsu-edge, 2px) solid var(--dsw-alias-border-l2);
+  outline-offset: calc(var(--dsu-edge, 2px) * -1);
+  box-shadow: var(--dsu-shadow-lg, 4px 4px 0 rgba(0, 0, 0, 0.28));
+}
+
+/* 菜单项：悬停时整块反色感（用背景，不占布局） */
+html[data-dsu-skin="pixel"] [role="menuitem"]:hover,
+html[data-dsu-skin="pixel"] [role="menuitemcheckbox"]:hover,
+html[data-dsu-skin="pixel"] [role="menuitemradio"]:hover,
+html[data-dsu-skin="pixel"] [role="option"]:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* ============================================================
+ * 5. 系统级动效降级（DESIGN §6、板块 A「可降级」）
+ *
+ * 系统开启「减少动态效果」时，整套皮肤自己关掉过渡与动画——
+ * 不让用户为了这件事再跑一趟设置页。系统偏好优先于皮肤内的
+ * 手动开关：即便设置里开着动效，系统要求减少也照样压掉。
+ *
+ * 位置：放文件末尾，只是可读性——全局兜底层放最后，与检查逻辑无关。
+ * 2026-11-05 变异实测：check-selectors **会**正常检查这个块里的卸载前缀
+ * （它从 `{` 之后重新起扫）。「媒体查询块会绕过前缀检查」是我一开始的
+ * 错误推断，已推翻；tests/check-motion.mjs 是第二道保险。
+ * ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html[data-dsu-skin],
+  html[data-dsu-skin] *,
+  html[data-dsu-skin] *::before,
+  html[data-dsu-skin] *::after {
+    transition: none !important;
+    animation: none !important;
+    /* 平滑滚动不属于 transition，官方 CSS 里有 1 处 scroll-behavior:smooth。 */
+    scroll-behavior: auto !important;
+  }
+}

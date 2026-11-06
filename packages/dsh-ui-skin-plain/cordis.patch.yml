@@ -1,0 +1,4 @@
+# dsh-ui-skin-plain：只挂一行。没有资源路由，也没有组件级 CSS。
+- insert:
+    - id: ui-skin-plain
+      name: 'dsh-ui-skin-plain'

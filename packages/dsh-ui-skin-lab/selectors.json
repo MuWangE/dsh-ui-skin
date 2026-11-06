@@ -1,0 +1,163 @@
+{
+  "version": 2,
+  "updatedAt": "2026-11-05",
+  "note": "所有依赖官方 DOM 的选择器在这里登记。CSS 或 client 里出现未登记的官方选择器，tests/check-selectors.mjs 会报。risk=high 必须写 fallback。expect：present=页面稳定存在（0 就说明官方 DOM 变了）、conditional=只在特定状态/内容下渲染（0 正常）、pseudo=伪元素（无法统计，跳过）。baselineHits 是真机实测值，仅供对照，不强制相等。",
+  "entries": [
+    {
+      "id": "slot-container",
+      "selector": "[data-slot]",
+      "purpose": "槽位容器标记，官方约定的稳定契约，用于能力探测",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 476
+    },
+    {
+      "id": "sidebar-slot",
+      "selector": "[data-slot=\"sidebar\"]",
+      "purpose": "左侧栏容器（槽位根，官方稳定契约）",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 1
+    },
+    {
+      "id": "sidebar-col",
+      "selector": "[class*=\"sidebarCol\"]",
+      "purpose": "侧栏真正的容器（哈希类名，含 sidebarCol），maid-atelier 同款",
+      "risk": "medium",
+      "fallback": "[data-slot=\"sidebar\"]",
+      "expect": "present",
+      "baselineHits": 1
+    },
+    {
+      "id": "header",
+      "selector": "header[class*=\"header\"]",
+      "purpose": "会话头部（对话/轨迹那一行）",
+      "risk": "medium",
+      "fallback": "[data-slot=\"conversation.header\"]",
+      "expect": "present",
+      "baselineHits": 1
+    },
+    {
+      "id": "conversation-header",
+      "selector": "[data-slot=\"conversation.header\"]",
+      "purpose": "会话头部槽位（分隔线用）",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 1
+    },
+    {
+      "id": "composer-card",
+      "selector": "[data-composer-card]",
+      "purpose": "输入框卡片（官方数据属性）",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 1
+    },
+    {
+      "id": "scrollbar",
+      "selector": "::-webkit-scrollbar",
+      "purpose": "WebKit 滚动条伪元素（像素风方块化用）；Chromium 下稳定",
+      "risk": "low",
+      "fallback": null,
+      "expect": "pseudo",
+      "baselineHits": null
+    },
+    {
+      "id": "markdown-code-block",
+      "selector": ".md-code-block",
+      "purpose": "Markdown 代码块容器（官方非哈希类名）。背景/圆角/banner 走 --dsl-code-block-* 中间层，这里只加像素硬边框与硬阴影",
+      "risk": "medium",
+      "fallback": null,
+      "expect": "conditional",
+      "baselineHits": 0
+    },
+    {
+      "id": "chat-flow-kind",
+      "selector": "[data-chat-flow-kind]",
+      "purpose": "消息行类型（user / assistant-step / tool-call / turn-tail / turn-process / model-retry）。官方语义属性，**比哈希类名稳**",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 259
+    },
+    {
+      "id": "interactive-button",
+      "selector": "button",
+      "purpose": "所有按钮（元素选择器，不是私有类）。像素风只加 inset box-shadow 描边，不动 border/盒模型——实测按钮高 24px，加 border 会撑到 28px",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 294
+    },
+    {
+      "id": "role-tab",
+      "selector": "[role=\"tab\"]",
+      "purpose": "对话/轨迹切换 tab（ARIA 标准锚点）",
+      "risk": "low",
+      "fallback": null,
+      "expect": "present",
+      "baselineHits": 4
+    },
+    {
+      "id": "role-menu",
+      "selector": "[role=\"menu\"]",
+      "purpose": "菜单浮层（ARIA 标准锚点）。只在打开时渲染",
+      "risk": "low",
+      "fallback": null,
+      "expect": "conditional",
+      "baselineHits": 0
+    },
+    {
+      "id": "role-dialog",
+      "selector": "[role=\"dialog\"]",
+      "purpose": "对话框（设置面板等，ARIA 标准锚点）。同样只在打开时渲染",
+      "risk": "low",
+      "fallback": null,
+      "expect": "conditional",
+      "baselineHits": 0
+    },
+    {
+      "id": "role-menuitem",
+      "selector": "[role=\"menuitem\"]",
+      "purpose": "菜单项（ARIA 标准锚点），悬停换背景用。同类还有 menuitemcheckbox / menuitemradio / option",
+      "risk": "low",
+      "fallback": null,
+      "expect": "conditional",
+      "baselineHits": 0
+    },
+    {
+      "id": "user-bubble",
+      "selector": "[class*=\"bubble\"]",
+      "purpose": "用户消息气泡的视觉载体（实测 class 含 bubble，背景 rgb(227,215,251)、padding 10px 16px、无边框）。哈希前缀会变，所以只认中段；**必须限定在 [data-chat-flow-kind=\"user\"] 之内**，不要全局命中",
+      "risk": "medium",
+      "fallback": "[data-chat-flow-kind=\"user\"]",
+      "expect": "conditional",
+      "baselineHits": 4
+    }
+  ],
+  "force": [
+    {
+      "id": "motion-off",
+      "selector": "html[data-dsu-skin][data-dsu-motion=\"off\"]",
+      "purpose": "手动「停用动效」：transition / animation / scroll-behavior 全部压平",
+      "reason": "官方过渡是硬编码的，CSS 变量表达不了时长与曲线，整体压制是唯一手段。作用域仅限用户主动关掉时。"
+    },
+    {
+      "id": "reduced-motion-system",
+      "selector": "html[data-dsu-skin]",
+      "scope": "reduced-motion",
+      "purpose": "系统 prefers-reduced-motion: reduce 时整页降级",
+      "reason": "标准媒体查询降级，只在该媒体块内生效。"
+    },
+    {
+      "id": "pixel-hardcut",
+      "selector": "html[data-dsu-skin=\"pixel\"]",
+      "purpose": "pixel 预设 0ms：只压 transition + scroll-behavior",
+      "reason": "DESIGN §6 承诺。刻意不压 animation——spinner / 状态点 / 骨架屏 / 打字指示点在压掉后会静止，那是功能损失。"
+    }
+  ]
+}
