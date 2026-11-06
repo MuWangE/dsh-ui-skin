@@ -374,6 +374,17 @@ junction 目标没被穿透。演练备份与文件清单在 `<工作区>/.tmp\u
 **一个推断，未直接确认**：卸掉 lab 后「外观」设置分区也会消失（该 section 由 lab 自己注册），
 按此推断此时界面里没有切皮肤的入口，只能重装恢复。要确认得在卸载状态下打开设置页看一眼。
 
+> **⚠️ 2026-11-06 复验（第二棒）——这条推断当场被推翻了一半**：卸掉 lab 后「外观」设置分区
+> **没有消失**，哥哥还能在里面把预设从 minimal 切到 pixel。原因是
+> **`remove_bundle` 只卸配置、不卸运行时**：profile 的 `dsh.profile.bundles` 与 `dependencies`
+> 都清干净了，但**页面不会自动重载**，lab 的 client 实例仍在内存里跑——`window.__dsuSkinLab` 仍 alive、
+> `data-dsu-skin` 仍挂着、`__dshSkinHub` 仍 alive、皮肤锁 owner 还是 `dsh-ui-skin-lab`、
+> lab 的 `debug.log` 也没有新的 `boot` 记录。
+> 所以「卸载后页面回原生」这类观察**必须在页面重载之后看**，否则看到的是「配置层已卸、运行时还在」的混合态。
+> ⚠️ 这与本节上表「卸激活皮肤 → 页面回 DSH 原生」的记录**不一致**，原因未查清
+> （可能当时页面恰好重载了，也可能与 HMR 活动有关）。两条都留着，别把哪一条当定论。
+> 已同步写进 `checkpoint-6a4dec9a.md` 的「已知坑」第 11 条。
+
 **回退 / 装回**：`install_bundle`，target 用 `link:<repo>/packages/<包名>`。
 
 ### 3.7 形态层与组件矩阵（M5 之后的架构加固）
@@ -632,6 +643,12 @@ E 板块剩下的旋钮：**密度**（暂缓——官方没有统一的间距�
 正确做法：`cp client.js .tmp/client.js.pre-probe` → 插探针 → 验完 `cp` 回来 → 再 `AppendAllText ' '`
 触发一次 HMR，最后 `git status` 确认干净。
 
+**探针里的定时器必须挂进 dispose 清理**（2026-11-06 踩到）：插在 `client.js` 里的探针若用
+`setInterval` 写 `document.title`、却没在 cleanup 里 `clearInterval`，**每次 HMR 都会泄漏一个定时器**，
+多个探针抢着写同一个标题，读回来的数据新旧混杂（旧版报 `kanji=V`、新版报 `kanji=V[c,26x26]`），
+一度误判成「CSS 没生效」。处置：拦截 `document.title` 的 setter、只放行不带探针前缀的值，
+再还原文件。**观测工具自己污染观测，是这类探针最隐蔽的失败方式。**
+
 ### 3.12 可分发：tarball 本机模拟真装（2026-11-06，F 板块收口）
 
 「换机器真装」原本没验。2026-11-06 用**本机模拟**补上了核心那一环：把自己的 tarball 装进真 DSH。
@@ -703,6 +720,14 @@ client/Host、patch 与 manifest 在实体包里同样生效。
 - **Ctrl+R 不生效**。只认 HMR：改 `lib/client.js` 会推；改 `tokens.css`、启停插件、改 patch **不会推**。
 - 改完 CSS 要 `printf ' ' >> lib/client.js` 碰一下触发 HMR。
 - 真脏了只能关窗口重开或重启 DSH。
+
+- ⛔ **绝对不要在插件代码里调 `location.reload()`**（2026-11-06 真炸过）。为了验「重载后皮肤属性
+  不出现」，有人往 whale-sense 的 `client.js` 插了一段带 `location.reload()` 的探针（还加了
+  localStorage 一次性标记防循环），结果页面重载后界面卡死，**只能卸载重装 DSH**——重装还把
+  profile 重置成默认值（bundles 从 26 掉到 2、patch 从 11 条掉到 3 条），是个连环事故。
+  `dsh-app://` 下的重载不是普通刷新，代价是一整块 UI 可能起不来。
+  **要验「重载后的状态」，请人在安全时机手动重启，不要自己造。**
+  完整记录见 `checkpoint-6a4dec9a.md` 的「⛔ 事故记录」。
 
 ### 4.7 页面有 80% 缩放
 

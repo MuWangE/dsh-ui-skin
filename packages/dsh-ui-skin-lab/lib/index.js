@@ -89,7 +89,7 @@ export function apply(ctx) {
       kind: 'prefix',
       path: ROUTE,
       handler: async (req, res) => {
-        // 和 whale-sense 一样，先过 DSH 的同源校验，别成为开放代理。
+        // 先过 DSH 的同源校验，别成为开放代理（官方资源路由的通行做法）。
         const connection = ctx.connection;
         if (connection !== undefined && connection !== null && typeof connection.requestRejection === 'function') {
           const rejection = connection.requestRejection(req);
